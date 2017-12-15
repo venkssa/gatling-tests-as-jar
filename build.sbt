@@ -14,21 +14,28 @@ initialize := {
 
 parallelExecution in Test := false
 
-enablePlugins(GatlingPlugin, AssemblyPlugin)
-
 lazy val root = (project in file("."))
   .configs(IntegrationTest)
   .settings(Defaults.itSettings: _*)
 
-Project.inConfig(IntegrationTest)(baseAssemblySettings)
-assemblyJarName in (IntegrationTest, assembly) := s"${name.value}-${version.value}.jar"
-mainClass in assembly := Some("example.Cli")
 
-val playVersion              = "2.4.3"
+enablePlugins(GatlingPlugin, AssemblyPlugin)
+Project.inConfig(IntegrationTest)(baseAssemblySettings)
+assemblyJarName in (IntegrationTest, assembly) := s"${name.value}-test-${version.value}.jar"
+mainClass in (IntegrationTest, assembly) := Some("io.gatling.app.Gatling")
+assemblyMergeStrategy in (IntegrationTest, assembly) := {
+  case x if x.contains("io.netty.versions.properties")  => MergeStrategy.rename
+  case x =>
+    val oldStrategy = (assemblyMergeStrategy in assembly).value
+    oldStrategy(x)
+}
+
+
+val playVersion              = "2.5.4"
 val scalaCheckVersion        = "1.12.2"
 val typeSafeConfigVersion    = "1.3.0"
 val jsoupVersion             = "1.9.2"
-val gatlingVersion           = "2.1.7"
+val gatlingVersion           = "2.2.3"
 
 libraryDependencies ++= Seq(
   "com.typesafe.play"        %%  "play-json"                 % playVersion           % IntegrationTest,
